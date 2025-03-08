@@ -13,6 +13,7 @@ app.use(express.json());
 
 // Routes
 app.use('/auth', authRoutes);
+
 // Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

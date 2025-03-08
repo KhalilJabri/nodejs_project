@@ -2,28 +2,25 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    trim: true,
-    default: '',
+  name: {type: String, trim: true, default: '', },
+  email: {type: String, required: true, unique: true, trim: true, lowercase: true, },
+  password: {type: String, required: true, minlength: 6, },
+  date_naiss: { type: Date, default: Date.now, },
+  genre: { type: String, default: '', },
+  role: { 
+    type: String, 
+    enum: ['admin', 'doctor', 'passion'], // Allowed values
+    required: true 
   },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true,
-    lowercase: true,
-  },
-  password: {
-    type: String,
-    required: true,
-    minlength: 6,
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
+  groupe_sanguin: { type: String, default: '', },
+  specialite: { type: String, default: '', },
+  salary: { type: Number, default: 0, },
+  allergies: { type: String, default: '', },
+  createdAt: { type: Date, default: Date.now, },
 });
+
+// Create a compound unique index for email and role
+// userSchema.index({ email: 1, role: 1 }, { unique: true });
 
 // Hash password before saving
 userSchema.pre('save', async function (next) {
