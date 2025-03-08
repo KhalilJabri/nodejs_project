@@ -7,15 +7,20 @@ const userSchema = new mongoose.Schema({
   password: {type: String, required: true, minlength: 6, },
   date_naiss: { type: Date, default: Date.now, },
   genre: { type: String, default: '', },
+  genre: { 
+    type: String, 
+    enum: ['male', 'female'], // Allowed values
+    default: ''
+  },
   role: { 
     type: String, 
-    enum: ['admin', 'doctor', 'passion'], // Allowed values
-    required: true 
+    enum: ['admin', 'doctor', 'patient'], // Allowed values
   },
   groupe_sanguin: { type: String, default: '', },
   specialite: { type: String, default: '', },
   salary: { type: Number, default: 0, },
   allergies: { type: String, default: '', },
+  code: { type: String, default: '', },
   createdAt: { type: Date, default: Date.now, },
 });
 
@@ -35,4 +40,5 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
+// Export model 
 module.exports = mongoose.model('User', userSchema);
