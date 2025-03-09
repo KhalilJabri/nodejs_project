@@ -35,5 +35,25 @@ const createRendezVous = async (req, res) => {
   }
 };
 
+const getRendezVousDoctor = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const doctorExists = await User.findById({_id: id, role: 'doctor'});
+    if (!doctorExists)
+      return res.status(400).json({ message: 'Doctor not found' });
 
-module.exports = { createRendezVous };
+    const rendezVous = await RendezVous.find({
+      _id: doctorExists._id,
+      status: 'approved',
+    })
+    
+    res.status(200).json({ data: rendezVous });
+    console.log('• approved rendezVous successfully fetched');
+
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+
+module.exports = { createRendezVous, getRendezVousDoctor };
