@@ -6,21 +6,21 @@ const createRendezVous = async (req, res) => {
   const { patient, doctor, date, time } = req.body;
 
   try {
-    const patientExists = await User.findById({_id: patient, role: 'patient'});
+    const patientExists = await User.findById({ _id: patient, role: 'patient' });
     if (!patientExists)
       return res.status(400).json({ message: 'Patient not found' });
 
-    const doctorExists = await User.findById({_id: doctor, role: 'doctor'});
+    const doctorExists = await User.findById({ _id: doctor, role: 'doctor' });
     if (!doctorExists)
       return res.status(400).json({ message: 'Doctor not found' });
 
     const rendezVousExists = await RendezVous.find({
-      doctor: doctorExists._id, 
+      doctor: doctorExists._id,
       date: date,
       time: time,
       status: 'approved',
     });
-    
+
     if (rendezVousExists.length > 0)
       return res.status(400).json({ message: 'Rendez-vous already scheduled' });
 
@@ -38,15 +38,17 @@ const createRendezVous = async (req, res) => {
 const getRendezVousDoctor = async (req, res) => {
   try {
     const id = req.params.id;
-    const doctorExists = await User.findById({_id: id, role: 'doctor'});
-    if (!doctorExists)
-      return res.status(400).json({ message: 'Doctor not found' });
+    const doctorExists = req.user;
+
+    if (doctorExists.role != 'admin' && (doctorExists.role != 'doctor' || doctorExists.id != id)) {
+      return res.status(400).json({ message: 'Only doctors can access this route' });
+    }
 
     const rendezVous = await RendezVous.find({
-      _id: doctorExists._id,
+      doctor: id,
       status: 'approved',
     })
-    
+
     res.status(200).json({ data: rendezVous });
     console.log('• approved rendezVous successfully fetched');
 
