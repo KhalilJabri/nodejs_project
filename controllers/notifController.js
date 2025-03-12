@@ -3,31 +3,33 @@ const nodemailer = require('nodemailer');
 require("dotenv").config();
 
 
-
-
-
-// transportaeur mail entre user et pass
-const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    }
-});
-
-
-const sendEmail = (to, subject, text) => {
-    const mailOptions = {
-        from: process.env.EMAIL_USER,
+const sendEmail = async (req, res) => {
+ const   {
         to,
         subject,
-        text
+        message
+      }  = req.body;
+    const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to, 
+        subject, 
+        text:message
     };
+    const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
+        }
+    });
     transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
-            console.error("Erreur d'envoi de l'email:", error);
+    res.status(400).json({ "msg" :"Erreur d'envoi de l'email:"});
+
+
         } else {
-            console.log("Email envoyé: " + info.response);
+    res.status(200).json({ "msg" :"Email envoyé: "});
+
         }
     });
 };
