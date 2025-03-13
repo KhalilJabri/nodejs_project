@@ -77,9 +77,21 @@ const deleteRendezVous = async (req, res) => {
   }
 };
 
+const getPendingRendezVous = async (req, res) => {
+  try {
+      // Récupérer les rendez-vous en attente (par exemple, avec un statut 'pending')
+      const pendingRendezVous = await RendezVous.find({ status: 'pending' });
+      
+      if (!pendingRendezVous || pendingRendezVous.length === 0) {
+          return res.status(404).json({ message: 'No pending appointments found' });
+      }
+
+      res.status(200).json(pendingRendezVous);
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Error fetching pending appointments' });
+  }
+};
 
 
-
-
-
-module.exports = { createRendezVous, getRendezVousDoctor, deleteRendezVous };
+module.exports = { createRendezVous, getRendezVousDoctor, deleteRendezVous , getPendingRendezVous };
