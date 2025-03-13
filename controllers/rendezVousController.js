@@ -1,5 +1,6 @@
 const User = require('../models/user');
 const RendezVous = require('../models/rendezvous');
+const rendezvous = require('../models/rendezvous');
 
 
 const createRendezVous = async (req, res) => {
@@ -93,5 +94,28 @@ const getPendingRendezVous = async (req, res) => {
   }
 };
 
+const getRendezVousPatient = async (req, res) => {
+  try {
+    const { id } = req.params; // Récupérer l'ID du patient
+    const patientExists = req.user; // L'utilisateur connecté
 
-module.exports = { createRendezVous, getRendezVousDoctor, deleteRendezVous , getPendingRendezVous };
+    if (patientExists.role !== 'admin' && (patientExists.role !== 'patient' || patientExists.id !== id)) {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+
+    const rendezVous = await RendezVous.find({ patient: id }).lean();
+
+    if (!rendezVous.length) {
+      return res.status(404).json({ message: 'No appointments found' });
+    }
+
+    res.status(200).json({ data: rendezVous });
+    console.log('✅ Patient rendezVous fetched successfully');
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+
+module.exports = { createRendezVous, getRendezVousDoctor, deleteRendezVous, getPendingRendezVous, getRendezVousPatient };
