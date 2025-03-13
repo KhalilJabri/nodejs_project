@@ -117,5 +117,35 @@ const getRendezVousPatient = async (req, res) => {
   }
 };
 
+const updateRendezVouStatus = async (req , res)=> {
+  try {
+    const { id } = req.params; // Récupérer l'ID du patient
+    const doctorExists = req.user; // L'utilisateur connecté
+  const { status} = req.body;
 
-module.exports = { createRendezVous, getRendezVousDoctor, deleteRendezVous, getPendingRendezVous, getRendezVousPatient };
+ /*   if (status !== "approuved" | "canceled" | "rejected" | "pending" ) {
+      return res.status(400).json({ message: 'Status should be "approuved" | "canceled" | "rejected" | "pending" ' });
+      
+    }*/
+    if (doctorExists.role != 'doctor') {
+      return res.status(400).json({ message: 'Only doctors can access this route' });
+    }
+   const existRendezVous = await rendezvous.findById(id);
+    if (!existRendezVous) {
+      return res.status(404).json({ message: 'rendezvous with this id not found' });
+      
+    }
+if (status === "approuved") {
+  return res.status(200).json({ msg : "updated" });
+  
+} else {
+  const update = await rendezvous.updateOne({_id: id},{status:status})
+  const after = await rendezvous.findById(id);
+   return res.status(200).json({ msg : "updated" , before:existRendezVous , after : after});
+}
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+}
+module.exports = { createRendezVous, getRendezVousDoctor, deleteRendezVous, getPendingRendezVous, getRendezVousPatient , updateRendezVouStatus };
