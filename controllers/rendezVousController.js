@@ -58,4 +58,28 @@ const getRendezVousDoctor = async (req, res) => {
 };
 
 
-module.exports = { createRendezVous, getRendezVousDoctor };
+
+
+// Fonction pour supprimer un rendez-vous
+const deleteRendezVous = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const rendezVous = await RendezVous.findById(id);
+    if (!rendezVous) {
+      return res.status(404).json({ message: 'Rendez-vous not found' });
+    }
+
+    await RendezVous.findByIdAndDelete(id);
+    res.status(200).json({ message: 'Rendez-vous deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+
+
+
+
+
+module.exports = { createRendezVous, getRendezVousDoctor, deleteRendezVous };
