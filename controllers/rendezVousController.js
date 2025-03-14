@@ -1,5 +1,6 @@
 const User = require('../models/user');
 const RendezVous = require('../models/rendezvous');
+const rendezvous = require('../models/rendezvous');
 
 
 const createRendezVous = async (req, res) => {
@@ -93,5 +94,68 @@ const getPendingRendezVous = async (req, res) => {
   }
 };
 
+const getRendezVousPatient = async (req, res) => {
+  try {
+    const { id } = req.params; // Récupérer l'ID du patient
+    const patientExists = req.user; // L'utilisateur connecté
 
-module.exports = { createRendezVous, getRendezVousDoctor, deleteRendezVous , getPendingRendezVous };
+    if (patientExists.role !== 'admin' && (patientExists.role !== 'patient' || patientExists.id !== id)) {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+
+    const rendezVous = await RendezVous.find({ patient: id }).lean();
+
+    if (!rendezVous.length) {
+      return res.status(404).json({ message: 'No appointments found' });
+    }
+
+    res.status(200).json({ data: rendezVous });
+    console.log('✅ Patient rendezVous fetched successfully');
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+const updateRendezVouStatus = async (req , res)=> {
+  try {
+    const { id } = req.params; // Récupérer l'ID du patient
+    const doctorExists = req.user; // L'utilisateur connecté
+  const { status} = req.body;
+
+ /*   if (status !== "approuved" | "canceled" | "rejected" | "pending" ) {
+      return res.status(400).json({ message: 'Status should be "approuved" | "canceled" | "rejected" | "pending" ' });
+      
+    }*/
+    if (doctorExists.role != 'doctor') {
+      return res.status(400).json({ message: 'Only doctors can access this route' });
+    }
+   const existRendezVous = await rendezvous.findById(id);
+    if (!existRendezVous) {
+      return res.status(404).json({ message: 'rendezvous with this id not found' });
+      
+    }
+if (status === "approuved") {
+  let approvedRendezVous = await rendezvous.find({
+    date: existRendezVous.date,
+    time: existRendezVous.time,
+      });
+  approvedRendezVous = approvedRendezVous.filter((r)=> r.id !== id)
+  if(approvedRendezVous.length !== 0){
+    return res.status(400).json({ msg : "you have rendevous on this date and time" });
+  }else{
+  const update = await rendezvous.updateOne({_id: id},{status:status})
+  const after = await rendezvous.findById(id);
+   return res.status(200).json({ msg : "updated" , before:existRendezVous , after : after});
+  }  
+} else {
+  const update = await rendezvous.updateOne({_id: id},{status:status})
+  const after = await rendezvous.findById(id);
+   return res.status(200).json({ msg : "updated" , before:existRendezVous , after : after});
+}
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+}
+module.exports = { createRendezVous, getRendezVousDoctor, deleteRendezVous, getPendingRendezVous, getRendezVousPatient , updateRendezVouStatus };
