@@ -136,8 +136,18 @@ const updateRendezVouStatus = async (req , res)=> {
       
     }
 if (status === "approuved") {
-  return res.status(200).json({ msg : "updated" });
-  
+  let approvedRendezVous = await rendezvous.find({
+    date: existRendezVous.date,
+    time: existRendezVous.time,
+      });
+  approvedRendezVous = approvedRendezVous.filter((r)=> r.id !== id)
+  if(approvedRendezVous.length !== 0){
+    return res.status(400).json({ msg : "you have rendevous on this date and time" });
+  }else{
+  const update = await rendezvous.updateOne({_id: id},{status:status})
+  const after = await rendezvous.findById(id);
+   return res.status(200).json({ msg : "updated" , before:existRendezVous , after : after});
+  }  
 } else {
   const update = await rendezvous.updateOne({_id: id},{status:status})
   const after = await rendezvous.findById(id);
